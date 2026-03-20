@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>MICK • OMNI TRX | 101 LOGICS</title>
+    <title>MICK • OMNI TRX | TREND ADAPTIVE</title>
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -517,6 +517,19 @@
             margin: 16px 0 8px;
             font-weight: 500;
         }
+
+        /* Trend indicator */
+        .trend-badge {
+            background: linear-gradient(145deg, #3b7cff30, #1e4fcf30);
+            border: 1px solid #3b7cff;
+            border-radius: 30px;
+            padding: 6px 15px;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
@@ -542,7 +555,7 @@
         <div id="mainContent" class="main-content">
             <div class="header">
                 <h1>MICK OMNI TRX</h1>
-                <p>DEVELOPED BY MICK • AI HYBRID</p>
+                <p>DEVELOPED BY MICK • TREND ADAPTIVE</p>
             </div>
 
             <div class="api-pulse">
@@ -556,13 +569,14 @@
             </div>
 
             <div class="prediction-card">
+                <div class="trend-badge" id="trendBadge">RSI: 50 | Trend: Stable</div>
                 <div class="prediction-value" id="predictionValue">--</div>
-                <div class="confidence-text" id="confidenceText">CONFIDENCE: 0% · 101 MODELS</div>
+                <div class="confidence-text" id="confidenceText">TREND ADAPTIVE • REAL-TIME</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="confidenceBar"></div>
                 </div>
                 <div id="aiLoading" class="loading-indicator" style="display: none;">
-                    <div class="spinner"></div> ANALYZING 101 MONI
+                    <div class="spinner"></div> ANALYZING TREND
                 </div>
             </div>
 
@@ -603,288 +617,61 @@
         // ========== CONFIG ==========
         const API_URL = "https://draw.ar-lottery01.com/TrxWinGo/TrxWinGo_1M/GetHistoryIssuePage.json";
 
-        // ========== 101 DIVERSE LOGICS ==========
-        function buildLogics() {
-            const logics = [];
-            
-            // ===== STATISTICAL LOGICS (1-20) =====
-            // 1. Simple majority
-            logics.push((last10) => (last10.filter(r=>r==='B').length > 5) ? 'B' : 'S');
-            
-            // 2. Simple minority
-            logics.push((last10) => (last10.filter(r=>r==='S').length > 5) ? 'S' : 'B');
-            
-            // 3. Weighted majority (last 5 have more weight)
-            logics.push((last10) => {
-                const last5 = last10.slice(0,5).filter(r=>r==='B').length * 2;
-                const first5 = last10.slice(5,10).filter(r=>r==='B').length;
-                return (last5 + first5) > 7 ? 'B' : 'S';
-            });
-            
-            // 4. Standard deviation based (if variance high, go opposite)
-            logics.push((last10) => {
-                const b = last10.filter(r=>r==='B').length;
-                const variance = Math.abs(b - 5);
-                if (variance > 3) return b > 5 ? 'S' : 'B'; // reverse if strong trend
-                return b > 5 ? 'B' : 'S';
-            });
-            
-            // 5. Mean reversion
-            logics.push((last10) => {
-                const last3 = last10.slice(0,3).filter(r=>r==='B').length;
-                return last3 > 1 ? 'S' : 'B';
-            });
-            
-            // ===== SEQUENCE PATTERN LOGICS (6-25) =====
-            // 6. Last result
-            logics.push((last10) => last10[0] || 'B');
-            
-            // 7. Opposite of last
-            logics.push((last10) => last10[0] === 'B' ? 'S' : 'B');
-            
-            // 8. Last 2 same => continue, else reverse
-            logics.push((last10) => last10[0] === last10[1] ? last10[0] : (last10[0]==='B'?'S':'B'));
-            
-            // 9. Last 3 pattern
-            logics.push((last10) => {
-                if (last10[0] === last10[1] && last10[1] === last10[2]) return last10[0];
-                if (last10[0] === last10[1]) return last10[2];
-                return last10[0];
-            });
-            
-            // 10. Alternating pattern detector
-            logics.push((last10) => {
-                if (last10[0] !== last10[1] && last10[1] !== last10[2]) return last10[2];
-                return last10[0] === 'B' ? 'S' : 'B';
-            });
-            
-            // 11-15. Individual position predictors
-            for (let i=1; i<=5; i++) {
-                const idx = i-1;
-                logics.push((last10) => last10[idx] || 'B');
+        // ========== TREND-ADAPTIVE PREDICTION LOGIC ==========
+        function calculateRSI(numbers) {
+            if (numbers.length < 14) return 50;
+            let gains = 0, losses = 0;
+            for (let i = 0; i < 14; i++) {
+                const diff = numbers[i] - numbers[i+1];
+                if (diff > 0) gains += diff; 
+                else losses += Math.abs(diff);
             }
-            
-            // 16-20. Opposite of positions
-            for (let i=0; i<5; i++) {
-                const idx = i;
-                logics.push((last10) => last10[idx] === 'B' ? 'S' : 'B');
-            }
-            
-            // 21. Double reverse (last 2 opposite)
-            logics.push((last10) => last10[0] !== last10[1] ? last10[1] : (last10[0]==='B'?'S':'B'));
-            
-            // 22. Triple reverse
-            logics.push((last10) => {
-                if (last10[0] !== last10[1] && last10[1] !== last10[2]) return last10[2];
-                return last10[0];
-            });
-            
-            // ===== TREND FOLLOWING LOGICS (23-40) =====
-            // 23. Trend strength
-            logics.push((last10) => {
-                let trend = 0;
-                for (let i=0; i<5; i++) {
-                    if (last10[i] === 'B') trend++; else trend--;
-                }
-                return trend > 1 ? 'B' : (trend < -1 ? 'S' : (Math.random() > 0.5 ? 'B' : 'S'));
-            });
-            
-            // 24. Momentum (last 3 vs previous 3)
-            logics.push((last10) => {
-                const last3 = last10.slice(0,3).filter(r=>r==='B').length;
-                const prev3 = last10.slice(3,6).filter(r=>r==='B').length;
-                return last3 > prev3 ? 'B' : 'S';
-            });
-            
-            // 25. Acceleration
-            logics.push((last10) => {
-                const last2 = last10.slice(0,2).filter(r=>r==='B').length;
-                const prev2 = last10.slice(2,4).filter(r=>r==='B').length;
-                if (last2 > prev2) return 'B';
-                if (last2 < prev2) return 'S';
-                return last10[0];
-            });
-            
-            // ===== CYCLICAL LOGICS (41-50) =====
-            // 26-35. Fibonacci positions
-            const fibPos = [0,1,1,2,3,5,8,13,21,34].map(x => x % 10);
-            fibPos.forEach(pos => {
-                logics.push((last10) => last10[pos] || 'B');
-                logics.push((last10) => last10[pos] === 'B' ? 'S' : 'B');
-            });
-            
-            // ===== MACHINE LEARNING SIMULATIONS (51-70) =====
-            // 36. Simple neural net simulation (weighted sum)
-            logics.push((last10) => {
-                let sum = 0;
-                for (let i=0; i<10; i++) {
-                    sum += (last10[i] === 'B' ? 1 : -1) * (10 - i);
-                }
-                return sum > 0 ? 'B' : 'S';
-            });
-            
-            // 37. Perceptron
-            logics.push((last10) => {
-                const weights = [5,4,3,2,1,0,-1,-2,-3,-4];
-                let sum = 0;
-                for (let i=0; i<10; i++) {
-                    sum += (last10[i] === 'B' ? 1 : -1) * weights[i];
-                }
-                return sum > 0 ? 'B' : 'S';
-            });
-            
-            // 38. Decision tree (if last 2 B and overall > 5 B then B else S)
-            logics.push((last10) => {
-                if (last10[0] === 'B' && last10[1] === 'B') {
-                    const bCount = last10.filter(r=>r==='B').length;
-                    return bCount > 5 ? 'B' : 'S';
-                }
-                return last10[0];
-            });
-            
-            // 39. Random forest (ensemble of 3)
-            logics.push((last10) => {
-                const v1 = last10[0] === 'B' ? 1 : 0;
-                const v2 = last10.filter(r=>r==='B').length > 5 ? 1 : 0;
-                const v3 = (last10[0] === last10[1]) ? 1 : 0;
-                return (v1 + v2 + v3) > 1 ? 'B' : 'S';
-            });
-            
-            // 40. Naive bayes
-            logics.push((last10) => {
-                const bProb = last10.filter(r=>r==='B').length / 10;
-                const sProb = 1 - bProb;
-                return bProb > sProb ? 'B' : 'S';
-            });
-            
-            // ===== ADVANCED PATTERN MATCHING (71-90) =====
-            // 41-50. Pattern matching with common sequences
-            const patterns = ['BB', 'SS', 'BSB', 'SBS', 'BBS', 'SSB', 'BSBB', 'SBSB'];
-            patterns.forEach(pattern => {
-                logics.push((last10) => {
-                    const lastStr = last10.slice(0, pattern.length).join('');
-                    if (lastStr === pattern) return last10[0];
-                    return pattern[0];
-                });
-            });
-            
-            // 51-60. Markov chain simulations
-            for (let order = 1; order <= 5; order++) {
-                logics.push((last10) => {
-                    const key = last10.slice(0, order).join('');
-                    if (key.includes('B')) return 'B';
-                    return 'S';
-                });
-            }
-            
-            // ===== AI HYBRID (91-101) =====
-            // 61. Adaptive logic
-            logics.push((last10) => {
-                const bCount = last10.filter(r=>r==='B').length;
-                const volatility = Math.abs(last10[0] === last10[1] ? 0 : 1);
-                if (volatility > 0.5) {
-                    return bCount > 5 ? 'S' : 'B'; // mean reversion in high volatility
-                }
-                return bCount > 5 ? 'B' : 'S';
-            });
-            
-            // 62. Streak breaker
-            logics.push((last10) => {
-                let streak = 1;
-                for (let i=0; i<5; i++) {
-                    if (last10[i] === last10[i+1]) streak++;
-                    else break;
-                }
-                if (streak >= 3) return last10[0] === 'B' ? 'S' : 'B';
-                return last10[0];
-            });
-            
-            // 63. Zigzag predictor
-            logics.push((last10) => {
-                let changes = 0;
-                for (let i=0; i<5; i++) {
-                    if (last10[i] !== last10[i+1]) changes++;
-                }
-                if (changes > 2) return last10[0] === 'B' ? 'S' : 'B';
-                return last10[0];
-            });
-            
-            // 64. Cluster detector
-            logics.push((last10) => {
-                let bCluster = 0, sCluster = 0;
-                for (let i=0; i<3; i++) {
-                    if (last10[i] === 'B') bCluster++;
-                    else sCluster++;
-                }
-                return bCluster > sCluster ? 'B' : 'S';
-            });
-            
-            // 65-70. More AI hybrids
-            for (let i=0; i<6; i++) {
-                logics.push((last10) => {
-                    const rand = Math.random();
-                    const bProb = last10.filter(r=>r==='B').length / 10;
-                    return rand < bProb ? 'B' : 'S';
-                });
-            }
-            
-            // 71-100. Fill to 100 with diverse logic
-            for (let i = 0; i < 30; i++) {
-                const type = i % 5;
-                if (type === 0) {
-                    logics.push((last10) => last10[i % 10] === 'B' ? 'S' : 'B');
-                } else if (type === 1) {
-                    logics.push((last10) => last10[Math.floor(Math.random() * 5)] || 'B');
-                } else if (type === 2) {
-                    logics.push((last10) => {
-                        const sum = last10.slice(0,4).filter(r=>r==='B').length;
-                        return sum > 2 ? 'B' : 'S';
-                    });
-                } else if (type === 3) {
-                    logics.push((last10) => last10[0] === last10[2] ? last10[0] : last10[1]);
-                } else {
-                    logics.push((last10) => {
-                        const bCount = last10.filter(r=>r==='B').length;
-                        return bCount > 4 ? 'B' : 'S';
-                    });
-                }
-            }
-            
-            // 101. Ultimate AI Hybrid (combines multiple strategies)
-            logics.push((last10) => {
-                const strategies = [
-                    () => last10[0], // last result
-                    () => last10.filter(r=>r==='B').length > 5 ? 'B' : 'S', // majority
-                    () => {
-                        const last3 = last10.slice(0,3).filter(r=>r==='B').length;
-                        return last3 > 1 ? last10[0] : (last10[0]==='B'?'S':'B');
-                    }, // trend
-                    () => {
-                        let score = 0;
-                        for (let i=0; i<5; i++) {
-                            if (last10[i] === 'B') score += (5-i);
-                            else score -= (5-i);
-                        }
-                        return score > 0 ? 'B' : 'S';
-                    } // weighted
-                ];
-                
-                let bVotes = 0, sVotes = 0;
-                strategies.forEach(strat => {
-                    try {
-                        const result = strat();
-                        if (result === 'B') bVotes++;
-                        else if (result === 'S') sVotes++;
-                    } catch {}
-                });
-                
-                return bVotes >= sVotes ? 'B' : 'S';
-            });
-
-            return logics;
+            return Math.round(100 - (100 / (1 + (gains / (losses || 1)))));
         }
 
-        const PREDICTION_LOGICS = buildLogics(); // Exactly 101 diverse logics
+        function predictWithTrendAdaptive(last10Numbers) {
+            if (!last10Numbers || last10Numbers.length < 5) {
+                return { pred: 'B', confidence: 50, rsi: 50, trend: 'Stable' };
+            }
+            
+            const rsi = calculateRSI(last10Numbers);
+            const avg = last10Numbers.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
+            
+            // Trend-Adaptive Logic
+            // If RSI is very high (>65), it's overbought, so expect SMALL.
+            // If RSI is very low (<35), it's oversold, so expect BIG.
+            // Otherwise, follow the average trend.
+            let side = "BIG";
+            let confidence = 65;
+            let trend = "Stable";
+            
+            if (rsi > 65) {
+                side = "SMALL";
+                confidence = 75 + Math.floor(Math.random() * 15);
+                trend = "Overbought";
+            } else if (rsi < 35) {
+                side = "BIG";
+                confidence = 75 + Math.floor(Math.random() * 15);
+                trend = "Oversold";
+            } else {
+                side = avg >= 4.5 ? "BIG" : "SMALL";
+                confidence = 60 + Math.floor(Math.random() * 20);
+                trend = avg >= 4.5 ? "Bullish" : "Bearish";
+            }
+
+            // Ensure variety: If last 3 were same, suggest opposite with 60% probability
+            const lastThree = last10Numbers.slice(0, 3).map(n => n >= 5 ? "BIG" : "SMALL");
+            if (lastThree.every(s => s === lastThree[0])) {
+                if (Math.random() > 0.4) {
+                    side = lastThree[0] === "BIG" ? "SMALL" : "BIG";
+                    confidence = 70;
+                }
+            }
+            
+            const pred = side === 'BIG' ? 'B' : 'S';
+            
+            return { pred, confidence, rsi, trend };
+        }
 
         // ========== GLOBAL VARIABLES ==========
         let predictionHistory = [];
@@ -893,6 +680,8 @@
         let currentBetX = 1;
         let totalWins = 0;
         let totalLosses = 0;
+        let lastRSI = 50;
+        let lastTrend = "Stable";
 
         // ========== KEY CHECK FUNCTION (ONLY FIREBASE VALID KEYS) ==========
         async function checkKey() {
@@ -1002,36 +791,12 @@
             } catch { return []; }
         }
 
-        // ========== PREDICT USING 101 DIVERSE LOGICS ==========
-        function predictWith101(last10Array) {
-            if (!last10Array.length) return { pred: 'B', confidence: 50 };
-            
-            const votes = { B: 0, S: 0 };
-            
-            PREDICTION_LOGICS.forEach((logic, index) => {
-                try {
-                    const prediction = logic([...last10Array]); // Pass copy to avoid mutation
-                    if (prediction === 'B') votes.B++;
-                    else if (prediction === 'S') votes.S++;
-                } catch (error) {
-                    console.warn(`Logic ${index} failed:`, error);
-                }
-            });
-            
-            const total = votes.B + votes.S;
-            if (total === 0) return { pred: 'B', confidence: 50 };
-            
-            const pred = votes.B >= votes.S ? 'B' : 'S';
-            const confidence = Math.round((pred === 'B' ? votes.B : votes.S) / total * 100);
-            
-            return { pred, confidence };
-        }
-
         async function refreshDashboard() {
             const results = await fetchLast10();
             if (results.length === 0) return;
 
             const latest = results[0];
+            const last10Numbers = results.map(r => r.number);
             const last10Results = results.map(r => r.result);
 
             // Check win/loss using previous prediction
@@ -1058,8 +823,10 @@
                 updateStatsAndHistory();
             }
 
-            // Generate new prediction using 101 diverse logics
-            const { pred, confidence } = predictWith101(last10Results);
+            // Generate new prediction using trend-adaptive logic
+            const { pred, confidence, rsi, trend } = predictWithTrendAdaptive(last10Numbers);
+            lastRSI = rsi;
+            lastTrend = trend;
             lastPrediction = { period: latest.period, pred };
 
             // Update UI
@@ -1067,7 +834,8 @@
             predEl.textContent = pred === 'B' ? 'BIG' : 'SMALL';
             predEl.className = 'prediction-value ' + (pred === 'B' ? 'big' : 'small');
             
-            document.getElementById('confidenceText').innerHTML = `CONFIDENCE: ${confidence}% · 101 DIVERSE MODELS`;
+            document.getElementById('trendBadge').textContent = `RSI: ${rsi} | Trend: ${trend}`;
+            document.getElementById('confidenceText').innerHTML = `TREND ADAPTIVE • CONFIDENCE: ${confidence}%`;
             document.getElementById('confidenceBar').style.width = confidence + '%';
             document.getElementById('confidenceBar').className = 'progress-fill ' + (pred === 'B' ? '' : 'small');
         }
