@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>MICK • OMNI TRX | TREND ADAPTIVE</title>
+    <title>MICK • OMNI TRX | 3LV FIX HACK</title>
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
@@ -518,17 +518,75 @@
             font-weight: 500;
         }
 
-        /* Trend indicator */
-        .trend-badge {
-            background: linear-gradient(145deg, #3b7cff30, #1e4fcf30);
-            border: 1px solid #3b7cff;
-            border-radius: 30px;
-            padding: 6px 15px;
-            font-size: 14px;
+        /* Hot Numbers Display */
+        .hot-numbers {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0 10px;
+        }
+        .hot-number-box {
+            width: 70px;
+            height: 70px;
+            background: rgba(15, 20, 30, 0.9);
+            border: 3px solid #3b7cff;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #3b7cff;
+            box-shadow: 0 0 20px #3b7cff80;
+            animation: numberGlow 2s infinite;
+        }
+        @keyframes numberGlow {
+            0% { box-shadow: 0 0 10px #3b7cff; }
+            50% { box-shadow: 0 0 30px #3b7cff; }
+            100% { box-shadow: 0 0 10px #3b7cff; }
+        }
+
+        /* Pattern Analysis */
+        .pattern-analysis {
+            background: rgba(15, 20, 30, 0.95);
+            border-radius: 32px;
+            padding: 18px;
+            margin: 20px 0;
+            border: 1px solid #3b7cff40;
+        }
+        .pattern-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #2f3542;
+            color: #8f9bb3;
+        }
+        .pattern-row span:last-child {
+            color: #3b7cff;
             font-weight: 600;
-            color: white;
-            margin-bottom: 15px;
+        }
+        .algorithm-badge {
+            background: #3b7cff20;
+            border: 1px solid #3b7cff;
+            border-radius: 40px;
+            padding: 5px 15px;
             display: inline-block;
+            color: white;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+        .jackpot-message {
+            color: #ff4d4d;
+            font-size: 24px;
+            font-weight: 800;
+            text-align: center;
+            animation: jackpotPulse 1s infinite;
+            margin: 15px 0;
+        }
+        @keyframes jackpotPulse {
+            0% { text-shadow: 0 0 10px #ff4d4d; transform: scale(1); }
+            50% { text-shadow: 0 0 30px #ff4d4d; transform: scale(1.1); }
+            100% { text-shadow: 0 0 10px #ff4d4d; transform: scale(1); }
         }
     </style>
 </head>
@@ -554,8 +612,8 @@
         <!-- MAIN DASHBOARD -->
         <div id="mainContent" class="main-content">
             <div class="header">
-                <h1>MICK OMNI TRX</h1>
-                <p>DEVELOPED BY MICK • TREND ADAPTIVE</p>
+                <h1>MICK 3LV FIX HACK</h1>
+                <p>DEVELOPED BY MICK • AI ENSEMBLE</p>
             </div>
 
             <div class="api-pulse">
@@ -569,14 +627,35 @@
             </div>
 
             <div class="prediction-card">
-                <div class="trend-badge" id="trendBadge">RSI: 50 | Trend: Stable</div>
+                <div class="algorithm-badge" id="algorithmBadge">AI ENSEMBLE</div>
                 <div class="prediction-value" id="predictionValue">--</div>
-                <div class="confidence-text" id="confidenceText">TREND ADAPTIVE • REAL-TIME</div>
+                <div class="hot-numbers" id="hotNumbers">
+                    <div class="hot-number-box" id="hotNumber1">-</div>
+                    <div class="hot-number-box" id="hotNumber2">-</div>
+                </div>
+                <div class="confidence-text" id="confidenceText">CONFIDENCE: 0%</div>
                 <div class="progress-bar">
                     <div class="progress-fill" id="confidenceBar"></div>
                 </div>
+                <div id="jackpotMessage" class="jackpot-message" style="display: none;">🏆 JACKPOT! 🏆</div>
                 <div id="aiLoading" class="loading-indicator" style="display: none;">
-                    <div class="spinner"></div> ANALYZING TREND
+                    <div class="spinner"></div> ANALYZING WITH AI
+                </div>
+            </div>
+
+            <!-- Pattern Analysis -->
+            <div class="pattern-analysis">
+                <div class="pattern-row">
+                    <span>BIG/SMALL PATTERN:</span>
+                    <span id="sizePattern">---</span>
+                </div>
+                <div class="pattern-row">
+                    <span>STREAK:</span>
+                    <span id="streakCount">0</span>
+                </div>
+                <div class="pattern-row">
+                    <span>ALGORITHM:</span>
+                    <span id="algorithmType">SCANNING</span>
                 </div>
             </div>
 
@@ -610,6 +689,10 @@
             appId: "1:20311434523:web:b5cd2eded2d7cd9e011fbe"
         };
 
+        // AI API Keys
+        const GEMINI_API_KEY = "AIzaSyBY6jW7LpbpeyERg9JaNhnqHZ7c51A1pqk";
+        const OPENAI_API_KEY = "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";
+
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
@@ -617,60 +700,202 @@
         // ========== CONFIG ==========
         const API_URL = "https://draw.ar-lottery01.com/TrxWinGo/TrxWinGo_1M/GetHistoryIssuePage.json";
 
-        // ========== TREND-ADAPTIVE PREDICTION LOGIC ==========
-        function calculateRSI(numbers) {
-            if (numbers.length < 14) return 50;
-            let gains = 0, losses = 0;
-            for (let i = 0; i < 14; i++) {
-                const diff = numbers[i] - numbers[i+1];
-                if (diff > 0) gains += diff; 
-                else losses += Math.abs(diff);
+        // ========== AI FUNCTIONS ==========
+        
+        // Gemini AI
+        async function getGeminiPrediction(historyNumbers) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+                const prompt = `Based on these last 10 TrxWinGo results: ${historyNumbers.join(', ')}. 
+                Predict if the next result will be BIG (5-9) or SMALL (0-4). 
+                Reply with JSON format: {"side": "BIG or SMALL", "confidence": 0-100}`;
+                
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+                
+                const data = await response.json();
+                const text = data.candidates[0].content.parts[0].text;
+                const jsonMatch = text.match(/\{.*\}/);
+                if (jsonMatch) {
+                    return JSON.parse(jsonMatch[0]);
+                }
+                return null;
+            } catch (e) {
+                console.log("Gemini error:", e);
+                return null;
             }
-            return Math.round(100 - (100 / (1 + (gains / (losses || 1)))));
         }
 
-        function predictWithTrendAdaptive(last10Numbers) {
-            if (!last10Numbers || last10Numbers.length < 5) {
-                return { pred: 'B', confidence: 50, rsi: 50, trend: 'Stable' };
+        // OpenAI ChatGPT
+        async function getOpenAIPrediction(historyNumbers) {
+            try {
+                const url = 'https://api.openai.com/v1/chat/completions';
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${OPENAI_API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: 'gpt-3.5-turbo',
+                        messages: [{
+                            role: 'user',
+                            content: `Based on these last 10 TrxWinGo results: ${historyNumbers.join(', ')}. 
+                            Predict if the next result will be BIG (5-9) or SMALL (0-4). 
+                            Reply with JSON format: {"side": "BIG or SMALL", "confidence": 0-100}`
+                        }],
+                        temperature: 0.3
+                    })
+                });
+                
+                const data = await response.json();
+                const text = data.choices[0].message.content;
+                const jsonMatch = text.match(/\{.*\}/);
+                if (jsonMatch) {
+                    return JSON.parse(jsonMatch[0]);
+                }
+                return null;
+            } catch (e) {
+                console.log("OpenAI error:", e);
+                return null;
             }
-            
-            const rsi = calculateRSI(last10Numbers);
-            const avg = last10Numbers.slice(0, 5).reduce((a, b) => a + b, 0) / 5;
-            
-            // Trend-Adaptive Logic
-            // If RSI is very high (>65), it's overbought, so expect SMALL.
-            // If RSI is very low (<35), it's oversold, so expect BIG.
-            // Otherwise, follow the average trend.
-            let side = "BIG";
-            let confidence = 65;
-            let trend = "Stable";
-            
-            if (rsi > 65) {
-                side = "SMALL";
-                confidence = 75 + Math.floor(Math.random() * 15);
-                trend = "Overbought";
-            } else if (rsi < 35) {
-                side = "BIG";
-                confidence = 75 + Math.floor(Math.random() * 15);
-                trend = "Oversold";
-            } else {
-                side = avg >= 4.5 ? "BIG" : "SMALL";
-                confidence = 60 + Math.floor(Math.random() * 20);
-                trend = avg >= 4.5 ? "Bullish" : "Bearish";
-            }
+        }
 
-            // Ensure variety: If last 3 were same, suggest opposite with 60% probability
-            const lastThree = last10Numbers.slice(0, 3).map(n => n >= 5 ? "BIG" : "SMALL");
-            if (lastThree.every(s => s === lastThree[0])) {
-                if (Math.random() > 0.4) {
-                    side = lastThree[0] === "BIG" ? "SMALL" : "BIG";
-                    confidence = 70;
+        // AI Ensemble
+        async function getAIPrediction(numbers) {
+            if (numbers.length < 5) return null;
+            
+            const [geminiResult, openaiResult] = await Promise.all([
+                getGeminiPrediction(numbers.slice(0, 10)),
+                getOpenAIPrediction(numbers.slice(0, 10))
+            ]);
+            
+            let votes = { BIG: 0, SMALL: 0 };
+            let totalConfidence = 0;
+            let aiCount = 0;
+            let methods = [];
+            
+            if (geminiResult && geminiResult.side) {
+                votes[geminiResult.side] += geminiResult.confidence || 70;
+                totalConfidence += geminiResult.confidence || 70;
+                aiCount++;
+                methods.push('Gemini');
+            }
+            
+            if (openaiResult && openaiResult.side) {
+                votes[openaiResult.side] += openaiResult.confidence || 70;
+                totalConfidence += openaiResult.confidence || 70;
+                aiCount++;
+                methods.push('OpenAI');
+            }
+            
+            if (aiCount === 0) return null;
+            
+            // Pattern detection (local logic)
+            let bigCount = numbers.filter(n => n >= 5).length;
+            let smallCount = numbers.length - bigCount;
+            
+            // Check for streaks
+            let streak = 1;
+            for (let i = 1; i < Math.min(5, numbers.length); i++) {
+                let prevSide = numbers[i-1] >= 5 ? 'BIG' : 'SMALL';
+                let currSide = numbers[i] >= 5 ? 'BIG' : 'SMALL';
+                if (prevSide === currSide) streak++;
+                else break;
+            }
+            
+            // Pattern-based prediction
+            let patternSide = bigCount > smallCount ? 'BIG' : 'SMALL';
+            if (streak >= 3) {
+                patternSide = streak >= 3 ? (patternSide === 'BIG' ? 'SMALL' : 'BIG') : patternSide;
+            }
+            
+            // Combine AI votes with pattern detection
+            if (votes.BIG > votes.SMALL) {
+                // AI says BIG, check if pattern agrees
+                if (patternSide === 'BIG') {
+                    return {
+                        side: 'BIG',
+                        confidence: Math.min(95, Math.round((votes.BIG / totalConfidence) * 100) + 10),
+                        method: `AI ENSEMBLE (${methods.join('+')}) + Pattern`
+                    };
+                } else {
+                    // AI and pattern disagree
+                    return {
+                        side: 'BIG',
+                        confidence: Math.max(50, Math.round((votes.BIG / totalConfidence) * 100) - 5),
+                        method: `AI ENSEMBLE (${methods.join('+')})`
+                    };
+                }
+            } else if (votes.SMALL > votes.BIG) {
+                if (patternSide === 'SMALL') {
+                    return {
+                        side: 'SMALL',
+                        confidence: Math.min(95, Math.round((votes.SMALL / totalConfidence) * 100) + 10),
+                        method: `AI ENSEMBLE (${methods.join('+')}) + Pattern`
+                    };
+                } else {
+                    return {
+                        side: 'SMALL',
+                        confidence: Math.max(50, Math.round((votes.SMALL / totalConfidence) * 100) - 5),
+                        method: `AI ENSEMBLE (${methods.join('+')})`
+                    };
+                }
+            } else {
+                // Tie, use pattern
+                return {
+                    side: patternSide,
+                    confidence: 75,
+                    method: 'Pattern Detection'
+                };
+            }
+        }
+
+        // Get hot numbers based on prediction
+        function getHotNumbers(prediction, last10Numbers) {
+            if (!last10Numbers || last10Numbers.length === 0) return ['-', '-'];
+            
+            let numberCounts = {};
+            for (let i = 0; i < Math.min(10, last10Numbers.length); i++) {
+                let num = last10Numbers[i];
+                numberCounts[num] = (numberCounts[num] || 0) + 1;
+            }
+            
+            let availableNumbers = [];
+            if (prediction === 'SMALL') {
+                availableNumbers = [0, 1, 2, 3, 4];
+            } else {
+                availableNumbers = [5, 6, 7, 8, 9];
+            }
+            
+            let sortedNumbers = availableNumbers.sort((a, b) => {
+                let countA = numberCounts[a] || 0;
+                let countB = numberCounts[b] || 0;
+                return countB - countA;
+            });
+            
+            let hotNumbers = sortedNumbers.slice(0, 2);
+            
+            while (hotNumbers.length < 2) {
+                let randomNum = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
+                if (!hotNumbers.includes(randomNum)) {
+                    hotNumbers.push(randomNum);
                 }
             }
             
-            const pred = side === 'BIG' ? 'B' : 'S';
-            
-            return { pred, confidence, rsi, trend };
+            return hotNumbers.sort((a, b) => a - b);
+        }
+
+        // Check if numbers match for jackpot
+        function checkJackpot(actualNumber, hotNumbers) {
+            if (!actualNumber || !hotNumbers) return false;
+            let num = parseInt(actualNumber);
+            return hotNumbers.includes(num);
         }
 
         // ========== GLOBAL VARIABLES ==========
@@ -680,10 +905,10 @@
         let currentBetX = 1;
         let totalWins = 0;
         let totalLosses = 0;
-        let lastRSI = 50;
-        let lastTrend = "Stable";
+        let last10Numbers = [];
+        let lastHotNumbers = ['-', '-'];
 
-        // ========== KEY CHECK FUNCTION (ONLY FIREBASE VALID KEYS) ==========
+        // ========== KEY CHECK FUNCTION ==========
         async function checkKey() {
             const key = document.getElementById('keyInput').value.trim();
             const msgEl = document.getElementById('keyMessage');
@@ -694,17 +919,14 @@
             }
 
             try {
-                // Firebase reference - keys stored under /global_trx/keys/
                 const snapshot = await database.ref('/global_trx/keys/' + key).once('value');
                 const keyData = snapshot.val();
                 
-                // Check if key exists in Firebase
                 if (!keyData) {
                     msgEl.textContent = 'INVALID KEY';
                     return;
                 }
 
-                // Check expiry
                 const today = new Date();
                 const expiry = new Date(keyData.expiry);
                 
@@ -713,23 +935,18 @@
                     return;
                 }
 
-                // Check usage limit
                 if (keyData.used >= keyData.limit) {
                     msgEl.textContent = 'LIMIT REACHED';
                     return;
                 }
 
-                // Increment used count
                 await database.ref('/global_trx/keys/' + key + '/used').set(keyData.used + 1);
                 
-                // Store in localStorage for persistence
                 localStorage.setItem('mick_valid_key', key);
                 
-                // Hide key section, show main content
                 document.getElementById('keySection').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
                 
-                // Load initial data
                 await refreshDashboard();
                 startTimer();
                 
@@ -739,7 +956,7 @@
             }
         }
 
-        // ========== AUTO-LOGIN IF VALID KEY EXISTS ==========
+        // ========== AUTO-LOGIN ==========
         (async function autoLogin() {
             const storedKey = localStorage.getItem('mick_valid_key');
             if (!storedKey) return;
@@ -753,14 +970,12 @@
                     const expiry = new Date(keyData.expiry);
                     
                     if (expiry >= today && keyData.used < keyData.limit) {
-                        // Valid key exists
                         document.getElementById('keySection').style.display = 'none';
                         document.getElementById('mainContent').style.display = 'block';
                         
                         await refreshDashboard();
                         startTimer();
                     } else {
-                        // Key expired or limit reached, remove from storage
                         localStorage.removeItem('mick_valid_key');
                     }
                 } else {
@@ -772,7 +987,7 @@
             }
         })();
 
-        // ========== FETCH LAST 10 RESULTS FROM API ==========
+        // ========== FETCH LAST 10 RESULTS ==========
         async function fetchLast10() {
             try {
                 const res = await fetch(`${API_URL}?ts=${Date.now()}`, {
@@ -791,17 +1006,52 @@
             } catch { return []; }
         }
 
+        // Detect pattern in results
+        function detectPattern(results) {
+            if (!results || results.length < 3) return { pattern: 'MIXED', streak: 0 };
+            
+            let streak = 1;
+            for (let i = 1; i < Math.min(5, results.length); i++) {
+                if (results[i-1].result === results[i].result) streak++;
+                else break;
+            }
+            
+            let bigCount = results.filter(r => r.result === 'B').length;
+            let smallCount = results.length - bigCount;
+            
+            let dominant = bigCount > smallCount ? 'BIG' : 'SMALL';
+            
+            if (streak >= 3) {
+                return { pattern: `${dominant} STREAK`, streak: streak };
+            }
+            return { pattern: 'MIXED', streak: streak };
+        }
+
         async function refreshDashboard() {
             const results = await fetchLast10();
             if (results.length === 0) return;
 
             const latest = results[0];
-            const last10Numbers = results.map(r => r.number);
+            last10Numbers = results.map(r => r.number);
             const last10Results = results.map(r => r.result);
+
+            // Detect pattern
+            const pattern = detectPattern(results);
+            document.getElementById('sizePattern').innerText = pattern.pattern;
+            document.getElementById('streakCount').innerText = pattern.streak;
 
             // Check win/loss using previous prediction
             if (lastPrediction && lastPeriodChecked !== latest.period) {
                 const isWin = lastPrediction.pred === latest.result;
+                
+                // Check for jackpot
+                if (lastHotNumbers && checkJackpot(latest.number, lastHotNumbers)) {
+                    document.getElementById('jackpotMessage').style.display = 'block';
+                    setTimeout(() => {
+                        document.getElementById('jackpotMessage').style.display = 'none';
+                    }, 5000);
+                }
+                
                 if (isWin) { 
                     totalWins++; 
                     currentBetX = 1; 
@@ -823,10 +1073,35 @@
                 updateStatsAndHistory();
             }
 
-            // Generate new prediction using trend-adaptive logic
-            const { pred, confidence, rsi, trend } = predictWithTrendAdaptive(last10Numbers);
-            lastRSI = rsi;
-            lastTrend = trend;
+            // Show loading
+            document.getElementById('aiLoading').style.display = 'flex';
+            
+            // Get AI prediction
+            const aiResult = await getAIPrediction(last10Numbers);
+            
+            let pred, confidence, method;
+            if (aiResult) {
+                pred = aiResult.side === 'BIG' ? 'B' : 'S';
+                confidence = aiResult.confidence;
+                method = aiResult.method;
+            } else {
+                // Fallback
+                let bigCount = last10Numbers.filter(n => n >= 5).length;
+                pred = bigCount > 5 ? 'B' : 'S';
+                confidence = 70;
+                method = 'Fallback Logic';
+            }
+            
+            document.getElementById('aiLoading').style.display = 'none';
+            
+            // Get hot numbers
+            lastHotNumbers = getHotNumbers(pred === 'B' ? 'BIG' : 'SMALL', last10Numbers);
+            document.getElementById('hotNumber1').innerText = lastHotNumbers[0];
+            document.getElementById('hotNumber2').innerText = lastHotNumbers[1];
+            
+            document.getElementById('algorithmType').innerText = method;
+            document.getElementById('algorithmBadge').innerText = method;
+            
             lastPrediction = { period: latest.period, pred };
 
             // Update UI
@@ -834,8 +1109,7 @@
             predEl.textContent = pred === 'B' ? 'BIG' : 'SMALL';
             predEl.className = 'prediction-value ' + (pred === 'B' ? 'big' : 'small');
             
-            document.getElementById('trendBadge').textContent = `RSI: ${rsi} | Trend: ${trend}`;
-            document.getElementById('confidenceText').innerHTML = `TREND ADAPTIVE • CONFIDENCE: ${confidence}%`;
+            document.getElementById('confidenceText').innerHTML = `CONFIDENCE: ${confidence}% • ${method}`;
             document.getElementById('confidenceBar').style.width = confidence + '%';
             document.getElementById('confidenceBar').className = 'progress-fill ' + (pred === 'B' ? '' : 'small');
         }
